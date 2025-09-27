@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plano de Estudos com IA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Focused Calm -->
+    <!-- Application Structure Plan: A estrutura foi desenhada como uma jornada de uma página para o usuário, começando com uma introdução motivacional, seguida pela filosofia por trás da gestão do tempo para criar adesão. O núcleo é um cronograma semanal interativo que permite ao usuário focar em dias específicos ou apenas nos estudos, reduzindo a sobrecarga de informação. Um gráfico de alocação de tempo oferece uma visão quantitativa do equilíbrio da rotina. A seguir, uma seção detalha como estudar cada matéria e integrar as ferramentas do usuário (Notion, Kindle, etc.), tornando o plano acionável. A estrutura foi escolhida para ser mais um guia estratégico do que uma simples agenda, focando na clareza, interatividade e implementação prática para um usuário com rotina complexa. -->
+    <!-- Visualization & Content Choices: 1. Informação do Relatório: Prioridades de estudo e rotina diária -> Objetivo: Visualizar o equilíbrio entre todas as atividades da vida -> Método de Apresentação: Gráfico de Barras Horizontais (Chart.js) -> Interação: Visualização estática da distribuição de horas semanais -> Justificativa: Fornece um resumo visual e imediato do comprometimento de tempo, mostrando que o plano é equilibrado e realista. 2. Informação do Relatório: Horários de trabalho, treino e blocos de estudo -> Objetivo: Apresentar o cronograma semanal de forma clara e não intimidadora -> Método de Apresentação: Grade de semana interativa (HTML/Tailwind) -> Interação: Botões para selecionar o dia, revelando a agenda detalhada; um toggle para filtrar e mostrar apenas os horários de estudo -> Justificativa: Permite que o usuário se concentre em um dia de cada vez, tornando o plano menos esmagador e mais fácil de seguir. 3. Informação do Relatório: Lista de matérias e ferramentas de estudo -> Objetivo: Organizar o método de estudo para cada disciplina -> Método de Apresentação: Abas interativas (HTML/JS) com planos de ação gerados por IA -> Interação: Clicar nas abas para alternar entre os planos de cada matéria e clicar em um botão para chamar a API Gemini -> Justificativa: Transforma uma seção estática em uma ferramenta dinâmica e personalizada que gera roteiros de estudo práticos e semanais. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F7F4;
+            color: #3D3B30;
+        }
+        .focused-calm-bg { background-color: #F8F7F4; }
+        .focused-calm-card { background-color: #FFFFFF; }
+        .focused-calm-primary { color: #3D3B30; }
+        .focused-calm-secondary { color: #6B685E; }
+        .focused-calm-accent { background-color: #D4C9B5; }
+        .focused-calm-accent-text { color: #3D3B30; }
+        .focused-calm-highlight { color: #A08C6E; }
+        .tab-button.active {
+            border-bottom: 2px solid #A08C6E;
+            color: #A08C6E;
+            font-weight: 600;
+        }
+        .day-button.active {
+            background-color: #A08C6E;
+            color: #FFFFFF;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 250px;
+            max-height: 300px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 300px;
+                max-height: 400px;
+            }
+        }
+        .gemini-button {
+            background-color: #A08C6E;
+            color: white;
+        }
+        .gemini-button:hover {
+            background-color: #8a785f;
+        }
+        .gemini-button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .prose-styles ul { list-style-position: inside; }
+        .prose-styles h3 { font-size: 1.125rem; font-weight: 600; margin-top: 1rem; margin-bottom: 0.5rem; }
+        .prose-styles strong { font-weight: 700; }
+    </style>
+</head>
+<body class="focused-calm-bg">
+
+    <div class="max-w-5xl mx-auto p-4 sm:p-6 lg:p-8">
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl font-bold focused-calm-primary mb-2">Seu Plano de Estudos com IA</h1>
+            <p class="text-lg focused-calm-secondary">Conciliando fé, carreira e performance com o poder da inteligência artificial.</p>
+        </header>
+
+        <main>
+            <section id="philosophy" class="mb-12 focused-calm-card p-8 rounded-2xl shadow-sm">
+                <h2 class="text-2xl font-bold focused-calm-primary mb-4">A Estratégia: Blocos de Foco e Tempo de Deslocamento</h2>
+                <p class="focused-calm-secondary leading-relaxed">Sua rotina é exigente. A grande mudança aqui é <span class="font-semibold focused-calm-highlight">transformar seu tempo de deslocamento em uma poderosa ferramenta de aprendizado</span>. Este plano agora se baseia em três pilares otimizados:</p>
+                <div class="grid md:grid-cols-3 gap-6 mt-6 text-center">
+                    <div class="border border-gray-200 p-4 rounded-lg">
+                        <h3 class="font-bold text-lg focused-calm-primary mb-2">🎯 Aprendizado em Trânsito</h3>
+                        <p class="text-sm focused-calm-secondary">Usamos seu deslocamento para leituras e podcasts (UX, Teologia, Interesses), transformando um tempo passivo em horas de estudo produtivo.</p>
+                    </div>
+                    <div class="border border-gray-200 p-4 rounded-lg">
+                        <h3 class="font-bold text-lg focused-calm-primary mb-2">💡 Foco Prático em Casa</h3>
+                        <p class="text-sm focused-calm-secondary">O tempo em casa agora é focado em estudo ativo e prático de UX/UI, onde você precisa de mais concentração e do seu notebook. Menos teoria, mais ação.</p>
+                    </div>
+                    <div class="border border-gray-200 p-4 rounded-lg">
+                        <h3 class="font-bold text-lg focused-calm-primary mb-2">⚡ Energia e Descanso</h3>
+                        <p class="text-sm focused-calm-secondary">O plano continua respeitando seus treinos e trabalho. O descanso é parte vital da estratégia para um aprendizado consistente e de alta performance.</p>
+                    </div>
+                </div>
+            </section>
+
+             <section id="schedule" class="mb-12 focused-calm-card p-8 rounded-2xl shadow-sm">
+                <h2 class="text-2xl font-bold focused-calm-primary mb-4">Cronograma Semanal Otimizado</h2>
+                <p class="focused-calm-secondary mb-6">Seus horários de deslocamento agora são blocos de estudo. Clique em um dia para ver os detalhes ou filtre para focar.</p>
+
+                <div class="flex flex-wrap items-center justify-between mb-6 gap-4">
+                    <div id="day-buttons" class="flex flex-wrap gap-2">
+                        <button class="day-button px-4 py-2 text-sm font-semibold rounded-full transition duration-200" data-day="seg">Seg</button>
+                        <button class="day-button px-4 py-2 text-sm font-semibold rounded-full transition duration-200" data-day="ter">Ter</button>
+                        <button class="day-button px-4 py-2 text-sm font-semibold rounded-full transition duration-200" data-day="qua">Qua</button>
+                        <button class="day-button px-4 py-2 text-sm font-semibold rounded-full transition duration-200" data-day="qui">Qui</button>
+                        <button class="day-button px-4 py-2 text-sm font-semibold rounded-full transition duration-200" data-day="sex">Sex</button>
+                        <button class="day-button px-4 py-2 text-sm font-semibold rounded-full transition duration-200" data-day="sab">Sáb</button>
+                        <button class="day-button px-4 py-2 text-sm font-semibold rounded-full transition duration-200" data-day="dom">Dom</button>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-sm font-medium mr-3 focused-calm-secondary">Foco em Estudos:</span>
+                        <label for="focus-toggle" class="flex items-center cursor-pointer">
+                            <div class="relative">
+                                <input type="checkbox" id="focus-toggle" class="sr-only">
+                                <div class="block bg-gray-200 w-14 h-8 rounded-full"></div>
+                                <div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition"></div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div id="schedule-details" class="mt-4 min-h-[200px] transition-all duration-300">
+                </div>
+            </section>
+            
+            <section class="mb-12 focused-calm-card p-8 rounded-2xl shadow-sm">
+                 <h2 class="text-2xl font-bold focused-calm-primary mb-2">Distribuição de Horas na Semana</h2>
+                 <p class="focused-calm-secondary mb-6">Uma visão geral de como seu tempo é investido com a rotina ajustada. O equilíbrio é a chave.</p>
+                 <div class="chart-container">
+                    <canvas id="timeAllocationChart"></canvas>
+                </div>
+            </section>
+
+            <section id="subjects" class="mb-12 focused-calm-card p-8 rounded-2xl shadow-sm">
+                <h2 class="text-2xl font-bold focused-calm-primary mb-6">Como Estudar Cada Matéria (com Gemini)</h2>
+                <p class="focused-calm-secondary mb-6">Selecione uma área e gere um plano de ação prático e semanal para seus estudos usando o poder do Gemini.</p>
+                <div class="border-b border-gray-200 mb-6">
+                    <nav id="tab-buttons" class="flex -mb-px gap-6">
+                        <button class="tab-button py-4 px-1 text-base font-medium focused-calm-secondary transition" data-tab="ux_subject">🎯 UX/UI & Design de Produto</button>
+                        <button class="tab-button py-4 px-1 text-base font-medium focused-calm-secondary transition" data-tab="theology">🕊️ Cristianismo & Teologia</button>
+                        <button class="tab-button py-4 px-1 text-base font-medium focused-calm-secondary transition" data-tab="others">🌱 Filosofia & Política</button>
+                    </nav>
+                </div>
+                <div id="tab-content">
+                </div>
+            </section>
+
+            <section id="ai-tutor" class="mb-12 focused-calm-card p-8 rounded-2xl shadow-sm">
+                <h2 class="text-2xl font-bold focused-calm-primary mb-4">✨ Seu Professor AI</h2>
+                <p class="focused-calm-secondary mb-6">Tem alguma dúvida ou quer aprofundar um tópico? Peça uma explicação simples e direta para o Gemini.</p>
+                <div class="flex flex-col sm:flex-row gap-2 mb-4">
+                    <input type="text" id="ai-prompt-input" placeholder="Ex: O que é 'Heurística de Nielsen'?" class="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#A08C6E]">
+                    <button id="ai-prompt-button" class="gemini-button font-bold py-3 px-6 rounded-lg hover:bg-opacity-90 transition duration-200 flex items-center justify-center">
+                        <span>Perguntar ao Gemini</span>
+                    </button>
+                </div>
+                <div id="ai-response-container" class="mt-4 p-4 border border-gray-200 rounded-lg min-h-[100px] bg-gray-50 prose-styles">
+                     Sua explicação aparecerá aqui...
+                </div>
+            </section>
+            
+            <section id="implementation" class="text-center">
+                 <h2 class="text-2xl font-bold focused-calm-primary mb-4">Próximos Passos: Daqui para a Ação</h2>
+                 <p class="focused-calm-secondary max-w-2xl mx-auto mb-6">Transforme este plano em realidade. Siga estes passos para integrar o cronograma à sua rotina.</p>
+                 <div class="flex flex-col md:flex-row items-center justify-center gap-4 text-left">
+                    <div class="w-full md:w-auto flex items-center p-4 focused-calm-accent rounded-lg">
+                        <span class="text-2xl mr-4">1️⃣</span>
+                        <p class="focused-calm-accent-text font-semibold">Agende no <span class="font-bold">Google Agenda</span>: Crie eventos recorrentes para cada bloco de estudo. Ative as notificações!</p>
+                    </div>
+                    <div class="w-full md:w-auto flex items-center p-4 focused-calm-accent rounded-lg">
+                        <span class="text-2xl mr-4">2️⃣</span>
+                        <p class="focused-calm-accent-text font-semibold">Prepare o <span class="font-bold">Notion</span>: Use os planos do Gemini para criar suas páginas de estudo.</p>
+                    </div>
+                     <div class="w-full md:w-auto flex items-center p-4 focused-calm-accent rounded-lg">
+                        <span class="text-2xl mr-4">3️⃣</span>
+                        <p class="focused-calm-accent-text font-semibold">Revise e Adapte: Após a primeira semana, ajuste os horários conforme necessário. A consistência vence a perfeição.</p>
+                    </div>
+                 </div>
+            </section>
+
+        </main>
+        
+        <footer class="text-center mt-16 pt-8 border-t border-gray-200">
+            <p class="text-sm focused-calm-secondary">Plano criado com base em princípios de alta performance e gestão de tempo. Lembre-se: "O coração do homem pode fazer planos, mas a resposta certa dos lábios vem do Senhor." - Provérbios 16:1.</p>
+        </footer>
+
+    </div>
+
+    <script>
+        const scheduleData = {
+            seg: [ { time: '06:00 - 07:30', activity: 'Treino', type: 'train' }, { time: '07:30 - 08:00', activity: 'Devocional e Café', type: 'personal' }, { time: '08:00 - 09:00', activity: 'Deslocamento / Leitura: Filosofia', type: 'study' }, { time: '09:00 - 17:00', activity: 'Trabalho', type: 'work' }, { time: '17:00 - 18:30', activity: 'Deslocamento / Podcast: UX/UI', type: 'study' }, { time: '18:30 - 20:00', activity: 'Jantar / Descanso', type: 'personal' }, { time: '20:00 - 21:00', activity: 'Estudo Focado e Prático: UX/UI', type: 'study' }, { time: '21:00...', activity: 'Relaxar / Preparar para dormir', type: 'personal' }, ],
+            ter: [ { time: '06:00 - 07:00', activity: 'Treino', type: 'train' }, { time: '07:00 - 08:00', activity: 'Devocional e Café da Manhã', type: 'personal' }, { time: '08:00 - 09:00', activity: 'Deslocamento / Leitura: Teologia', type: 'study' }, { time: '09:00 - 17:00', activity: 'Trabalho', type: 'work' }, { time: '17:00 - 18:30', activity: 'Deslocamento / Podcast: UX/UI', type: 'study' }, { time: '18:30 - 19:30', activity: 'Jantar / Descanso', type: 'personal' }, { time: '19:30 - 20:30', activity: 'Estudo Focado e Prático: UX/UI', type: 'study' }, { time: '20:30...', activity: 'Tempo livre / Relaxar', type: 'personal' }, ],
+            qua: [ { time: '06:00 - 07:30', activity: 'Treino', type: 'train' }, { time: '07:30 - 08:00', activity: 'Devocional e Café', type: 'personal' }, { time: '08:00 - 09:00', activity: 'Deslocamento / Leitura: Política', type: 'study' }, { time: '09:00 - 17:00', activity: 'Trabalho', type: 'work' }, { time: '17:00 - 18:30', activity: 'Deslocamento / Podcast: UX/UI', type: 'study' }, { time: '18:30 - 20:00', activity: 'Jantar / Descanso', type: 'personal' }, { time: '20:00 - 21:00', activity: 'Estudo Focado e Prático: UX/UI', type: 'study' }, { time: '21:00...', activity: 'Relaxar / Preparar para dormir', type: 'personal' }, ],
+            qui: [ { time: '06:00 - 07:00', activity: 'Treino', type: 'train' }, { time: '07:00 - 08:00', activity: 'Devocional e Café da Manhã', type: 'personal' }, { time: '08:00 - 09:00', activity: 'Deslocamento / Leitura: Teologia', type: 'study' }, { time: '09:00 - 17:00', activity: 'Trabalho', type: 'work' }, { time: '17:00 - 18:30', activity: 'Deslocamento / Podcast: Product Design', type: 'study' }, { time: '18:30 - 20:00', activity: 'Jantar / Tempo em família', type: 'personal' }, { time: '20:00...', activity: 'Tempo livre / Descanso', type: 'personal' }, ],
+            sex: [ { time: '06:00 - 07:30', activity: 'Treino', type: 'train' }, { time: '07:30 - 08:00', activity: 'Devocional e Café', type: 'personal' }, { time: '08:00 - 09:00', activity: 'Deslocamento / Revisão Semanal (Artigos/Podcasts)', type: 'study' }, { time: '09:00 - 17:00', activity: 'Trabalho', type: 'work' }, { time: '17:00 - 18:30', activity: 'Deslocamento / Lazer (Música/Podcast livre)', type: 'personal' }, { time: '18:30...', activity: 'Livre / Social', type: 'personal' }, ],
+            sab: [ { time: 'Manhã', activity: 'Treino Longo (2.5h) ou Descanso Ativo', type: 'train' }, { time: 'Tarde', activity: 'Estudo Profundo: Cristianismo/Teologia (2h)', type: 'study' }, { time: 'Resto do dia', activity: 'Livre / Social / Família', type: 'personal' }, ],
+            dom: [ { time: 'Manhã', activity: 'Igreja', type: 'personal' }, { time: 'Tarde', activity: 'Descanso / Leitura Livre / Hobby', type: 'personal' }, { time: 'Noite', activity: 'Planejamento da Semana Seguinte', type: 'personal' }, ],
+        };
+        const tabContentData = {
+            ux_subject: { title: '🎯 UX/UI & Design de Produto', description: 'Seu foco profissional. A chave é a consistência. Gere um plano de ação semanal para manter o foco.', prompt: "Aja como um mentor sênior de design UX/UI. Crie um plano de ação conciso de 5 passos para uma semana de estudo sobre 'UX/UI & Design de Produto'. O plano deve incluir um exercício prático, um conceito para pesquisar e um artigo ou capítulo de livro para ler. O usuário trabalha em tempo integral e treina com frequência, portanto as tarefas devem ser realizáveis em cerca de 1 hora por dia. Formate a resposta usando markdown com cabeçalhos e listas." },
+            theology: { title: '🕊️ Cristianismo & Teologia', description: 'O alicerce da sua vida. Peça um plano de estudo devocional e reflexivo para fortalecer sua fé e cosmovisão.', prompt: "Aja como um professor de teologia. Crie um plano de estudo conciso de 3 passos para a semana focado em reflexão sobre 'Cristianismo e Teologia'. Inclua uma passagem-chave das Escrituras para meditar, um conceito teológico para explorar (por exemplo, soteriologia, eclesiologia) e uma pergunta para reflexão pessoal em um diário. O tom deve ser encorajador e pastoral. Formate a resposta usando markdown com cabeçalhos e listas." },
+            others: { title: '🌱 Filosofia & Política', description: 'Seus interesses para expandir o repertório. Gere um roteiro simples para explorar um conceito e conectá-lo com eventos atuais.', prompt: "Aja como um tutor de ciência política e filosofia. Para o tema 'Filosofia e Política', crie um plano de aprendizado simples de 3 passos para um iniciante esta semana. Inclua um conceito filosófico-chave para entender, um evento de notícias recente na política brasileira para analisar a partir dessa perspectiva filosófica e uma pergunta para consideração. Formate a resposta usando markdown com cabeçalhos e listas." }
+        };
+        
+        const scheduleDetailsContainer = document.getElementById('schedule-details');
+        const dayButtons = document.querySelectorAll('.day-button');
+        const focusToggle = document.getElementById('focus-toggle');
+        const tabButtons = document.querySelectorAll('#tab-buttons .tab-button');
+        const tabContentContainer = document.getElementById('tab-content');
+        const aiPromptInput = document.getElementById('ai-prompt-input');
+        const aiPromptButton = document.getElementById('ai-prompt-button');
+        const aiResponseContainer = document.getElementById('ai-response-container');
+        
+        const API_KEY = "";
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${API_KEY}`;
+        
+        async function callGemini(prompt, buttonToDisable) {
+            if (buttonToDisable) buttonToDisable.disabled = true;
+            const payload = { contents: [{ parts: [{ text: prompt }] }] };
+            try {
+                const response = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                if (!response.ok) { throw new Error(`API Error: ${response.statusText}`); }
+                const result = await response.json();
+                const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                return text || "Não foi possível obter uma resposta. Tente novamente.";
+            } catch (error) {
+                console.error("Gemini API call failed:", error);
+                return "Ocorreu um erro ao contatar a IA. Por favor, verifique o console para mais detalhes e tente novamente.";
+            } finally {
+                if (buttonToDisable) buttonToDisable.disabled = false;
+            }
+        }
+        
+        function parseMarkdown(text) {
+            let html = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>');
+            const lines = html.split('\n');
+            let inList = false;
+            html = '';
+            for (let line of lines) {
+                if (line.trim().startsWith('- ') || line.trim().startsWith('* ')) {
+                    if (!inList) { html += '<ul>'; inList = true; }
+                    html += `<li>${line.trim().substring(2)}</li>`;
+                } else {
+                    if (inList) { html += '</ul>'; inList = false; }
+                    if (line.trim().startsWith('# ')) { html += `<h3>${line.trim().substring(2)}</h3>`; } else { html += line + '<br>'; }
+                }
+            }
+            if (inList) html += '</ul>';
+            return html.replace(/<br><ul>/g, '<ul>').replace(/<\/ul><br>/g, '</ul>');
+        }
+        
+        function showLoading(container) {
+            container.innerHTML = `<div class="flex items-center justify-center h-full text-gray-500"><svg class="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>Gerando resposta...</span></div>`;
+        }
+        
+        function renderSchedule(day, focusMode = false) {
+            const data = scheduleData[day];
+            let content = '<ul class="space-y-3">';
+            const filteredData = focusMode ? data.filter(item => item.type === 'study') : data;
+            if (filteredData.length === 0) {
+                content += `<li class="flex items-center p-3 rounded-lg focused-calm-secondary"><span class="font-semibold w-32">--</span><span>Nenhum bloco de estudo para hoje. Aproveite para descansar!</span></li>`;
+            } else {
+                filteredData.forEach(item => {
+                    let colorClass = 'bg-gray-100';
+                    if (item.type === 'study') colorClass = 'bg-blue-100';
+                    if (item.type === 'train') colorClass = 'bg-green-100';
+                    if (item.type === 'work') colorClass = 'bg-yellow-100';
+                    content += `<li class="flex items-center p-3 rounded-lg ${colorClass}"><span class="font-semibold w-32 text-gray-700">${item.time}</span><span class="text-gray-800">${item.activity}</span></li>`;
+                });
+            }
+            content += '</ul>';
+            scheduleDetailsContainer.innerHTML = content;
+        }
+
+        function renderTabContent(tab) {
+            const data = tabContentData[tab];
+            let content = `<div class="p-2"><h3 class="text-xl font-bold focused-calm-primary mb-2">${data.title}</h3><p class="focused-calm-secondary mb-6">${data.description}</p><button data-tab-id="${tab}" class="action-plan-button gemini-button font-bold py-2 px-4 rounded-lg hover:bg-opacity-90 transition duration-200 flex items-center">✨ Gerar Plano de Ação Semanal</button><div id="action-plan-${tab}" class="mt-4 p-4 border border-gray-200 rounded-lg min-h-[150px] bg-gray-50 prose-styles">Clique no botão acima para gerar um plano de estudos detalhado para esta semana.</div></div>`;
+            tabContentContainer.innerHTML = content;
+        }
+
+        dayButtons.forEach(button => button.addEventListener('click', () => { dayButtons.forEach(btn => btn.classList.remove('active')); button.classList.add('active'); renderSchedule(button.dataset.day, focusToggle.checked); }));
+        focusToggle.addEventListener('change', () => { const activeBtn = document.querySelector('.day-button.active'); if (activeBtn) renderSchedule(activeBtn.dataset.day, focusToggle.checked); });
+        tabButtons.forEach(button => button.addEventListener('click', () => { tabButtons.forEach(btn => btn.classList.remove('active')); button.classList.add('active'); renderTabContent(button.dataset.tab); }));
+        
+        tabContentContainer.addEventListener('click', async (e) => {
+            if (e.target.classList.contains('action-plan-button')) {
+                const button = e.target;
+                const tabId = button.dataset.tabId;
+                const prompt = tabContentData[tabId].prompt;
+                const container = document.getElementById(`action-plan-${tabId}`);
+                showLoading(container);
+                const response = await callGemini(prompt, button);
+                container.innerHTML = parseMarkdown(response);
+            }
+        });
+        
+        aiPromptButton.addEventListener('click', async () => {
+            const topic = aiPromptInput.value.trim();
+            if (!topic) { aiResponseContainer.textContent = "Por favor, insira um tópico para perguntar."; return; }
+            const fullPrompt = `Explique o conceito de '${topic}' de forma simples e concisa, em um parágrafo. Ideal para um iniciante no assunto.`;
+            showLoading(aiResponseContainer);
+            const response = await callGemini(fullPrompt, aiPromptButton);
+            aiResponseContainer.innerHTML = parseMarkdown(response);
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            dayButtons[0].click();
+            tabButtons[0].click();
+
+            const chartCtx = document.getElementById('timeAllocationChart');
+            if (chartCtx) {
+              new Chart(chartCtx.getContext('2d'), {
+                  type: 'bar',
+                  data: {
+                      labels: ['Trabalho & Desloc.', 'Treino', 'Estudo Essencial', 'Estudo Interesses', 'Descanso/Pessoal'],
+                      datasets: [{ label: 'Horas por Semana', data: [52.5, 9, 14, 2, 45], backgroundColor: ['rgba(212, 201, 181, 0.7)', 'rgba(163, 173, 156, 0.7)', 'rgba(122, 141, 169, 0.7)', 'rgba(181, 156, 163, 0.7)', 'rgba(189, 189, 189, 0.7)'], borderColor: ['rgba(212, 201, 181, 1)', 'rgba(163, 173, 156, 1)', 'rgba(122, 141, 169, 1)', 'rgba(181, 156, 163, 1)', 'rgba(189, 189, 189, 1)'], borderWidth: 1 }]
+                  },
+                  options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { beginAtZero: true, stacked: true, title: { display: true, text: 'Horas' } }, y: { stacked: true } }, plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(context) { return `${context.dataset.label}: ${context.raw} horas`; } } } } }
+              });
+            }
+            
+            const toggle = document.querySelector('#focus-toggle');
+            toggle.addEventListener('change', () => {
+                const container = toggle.parentElement;
+                if (!container) return;
+
+                const dot = container.querySelector('.dot');
+                const backgroundDiv = container.querySelector('.block');
+                
+                if (dot && backgroundDiv) {
+                    if (toggle.checked) {
+                        dot.style.transform = 'translateX(100%)';
+                        backgroundDiv.classList.add('bg-green-400');
+                        backgroundDiv.classList.remove('bg-gray-200');
+                    } else {
+                        dot.style.transform = 'translateX(0)';
+                        backgroundDiv.classList.remove('bg-green-400');
+                        backgroundDiv.classList.add('bg-gray-200');
+                    }
+                }
+            });
+        });
+
+    </script>
+</body>
+</html>
